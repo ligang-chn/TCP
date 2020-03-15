@@ -1,6 +1,7 @@
 import serial #导入模块
 import threading
 import pymysql
+import binascii
 
 
 class Database:
@@ -34,13 +35,13 @@ class Database:
         #     print("id=%s,name=%s" % \
         #           (id, name))
 
-    def sql_INSERT(self,sql_insert):
+    def sql_INSERT(self,sql_insert,val):
         """数据库插入
         eg:
         db.sql_INSERT("INSERT INTO student(name,age,score) VALUES ('LIGANG',23.5,435.4)")
         """
         try:
-            self.cursor.execute(sql_insert)
+            self.cursor.execute(sql_insert,val)
             self.db.commit()#提交到数据库
         except:
             self.db.rollback()#如果发生错误，则回滚
@@ -95,8 +96,20 @@ def ReadData(ser):
     # 循环接收数据，此为死循环，可用线程实现
     while BOOL:
         if ser.in_waiting:
-            STRGLO = ser.read(ser.in_waiting).decode("gbk")
+            # STRGLO = ser.read(ser.in_waiting).decode("utf-8")
+            # STRGLO=ser.read(51).decode("utf-8")
+            # STRGLO = ser.read(ser.in_waiting).decode("iso-8859-15")
+            STRGLO = ser.read(ser.in_waiting).decode("utf-8")
+            # print("接收的数据：")
             print(STRGLO)
+            dataRec=str(STRGLO)
+            prt_res=dataRec.split(',')
+            print(prt_res)
+            vals = (str(prt_res[0]), float(prt_res[1]), float(prt_res[2]))
+            db.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s)",vals)
+            print("success!")
+
+
 
 #打开串口
 # 端口，GNU / Linux上的/ dev / ttyUSB0 等 或 Windows上的 COM3 等
@@ -132,6 +145,24 @@ def DReadPort():
     str=STRGLO
     STRGLO=""#清空当次读取
     return str
+
+# 发送指令的完整流程
+def send_cmd( cmd):
+    ser.write(cmd)
+    response = ser.readall()
+    response = convert_hex(response)
+    return response
+
+# 转成16进制的函数
+def convert_hex( string):
+    res = []
+    result = []
+    for item in string:
+        res.append(item)
+    for i in res:
+        result.append(hex(i))
+    return result
+
 
 if __name__=="__main__":
 
