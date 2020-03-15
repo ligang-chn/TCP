@@ -102,12 +102,13 @@ def ReadData(ser):
             STRGLO = ser.read(ser.in_waiting).decode("utf-8")
             # print("接收的数据：")
             print(STRGLO)
-            dataRec=str(STRGLO)
-            prt_res=dataRec.split(',')
-            print(prt_res)
-            vals = (str(prt_res[0]), float(prt_res[1]), float(prt_res[2]))
-            db.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s)",vals)
-            print("success!")
+            #接收数据入库
+            # dataRec=str(STRGLO)
+            # prt_res=dataRec.split(',')
+            # print(prt_res)
+            # vals = (str(prt_res[0]), float(prt_res[1]), float(prt_res[2]))
+            # db.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s)",vals)
+            # print("success!")
 
 
 
@@ -168,18 +169,20 @@ if __name__=="__main__":
 
     ser,ret=DOpenPort("COM8",9600,None)
     db=Database()
+    #开始传输数据命令
+    flag=input("开始传输(start): ")
 
-    if(ret==True):#判断串口是否成功打开
+    if((ret==True) & (flag=="start")):#判断串口是否成功打开
         rec=db.sql_SELECT("SELECT * FROM student WHERE id=7555")
         for row in rec:
             name=row[1]
             age=row[2]
             score=row[3]
-        print(str(name)+" "+str(age)+" "+str(score))
-        # count=DWritePort(ser,str(name)+str(age)+str(score))
-        # print("写入字节数：",count)
-        port_data=DReadPort() #读串口数据
-        print(port_data)
+        # print(str(name)+" "+str(age)+" "+str(score))
+        count=DWritePort(ser,str(name)+","+str(age)+","+str(score))
+        print("写入字节数：",count)
+        # port_data=DReadPort() #读串口数据
+        # print(port_data)
          # DColsePort(ser)  #关闭串口
 
 
