@@ -9,7 +9,7 @@
 import socketserver
 import pymysql
 import struct
-import binascii
+#import binascii
 
 class Database:
     """
