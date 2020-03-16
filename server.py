@@ -15,7 +15,7 @@ class Database:
     """
     数据库服务器的地址、账户、密码和库名
     """
-    def __init__(self, host="localhost", user="root", password="icet190114", database="info"):
+    def __init__(self, host="localhost", user="root", password="123456", database="info"):
         try:
             self.db = pymysql.connect(host, user, password, database)#连接数据库
             # 使用 cursor() 方法创建一个游标对象 cursor
@@ -103,7 +103,7 @@ class Server(socketserver.BaseRequestHandler):
         self.request = request#套接字对象
         self.client_address = client_address#客户端地址信息
         self.server = server#包含调用处理程序的实例
-        self.database = Database("localhost", "root", "icet190114", "info")
+        self.database = Database("localhost", "root", "123456", "info")
         print("[" + self.client_address[0] + "] " + "Connect database successfully.")
 
 
@@ -129,16 +129,32 @@ class Server(socketserver.BaseRequestHandler):
                 while len(ret_bytes)<6:#限制空字符
                     ret_bytes = conn.recv(1024)
 
-                print(ret_bytes)
+                # print(ret_bytes)
                 # tuplerec=struct.unpack("!9h",ret_bytes)
                 # print(tuplerec)
-                listrec=binascii.hexlify(ret_bytes).decode()#转换成原始16进制字符串，这个和mcu发送的字符一样
-                print(listrec)
+
+                # listrec=binascii.hexlify(ret_bytes).decode()#转换成原始16进制字符串，这个和mcu发送的字符一样
+                # print(listrec)
+
                 # if(listrec[-1]=='9'):
                 #     print(listrec)
                 #     break
                 ret_str=str(ret_bytes,encoding="utf-8")#ret_bytes.decode("utf-8")
                 print(ret_str)
+                prt_res = ret_str.split(',')  # 分隔符
+                vals=(str(prt_res[0]),float(prt_res[1]),float(prt_res[2]))
+                print(vals)
+                print("-----------------------")
+                print("******start insert*****")
+                try:
+                    self.database.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s) ", vals)
+                # self.database.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s)",vals)
+                #     self.database.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s)",vals)
+                except Exception as e:
+                    print("insert fail!")
+
+
+
                 # ret_str=str(ret_bytes,encoding="utf-8")
                 #
                 #
