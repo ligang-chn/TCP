@@ -137,7 +137,8 @@ class Server(socketserver.BaseRequestHandler):
                 # if(listrec[-1]=='9'):
                 #     print(listrec)
                 #     break
-                print(ret_bytes.decode("utf-8"))
+                ret_str=str(ret_bytes,encoding="utf-8")#ret_bytes.decode("utf-8")
+                print(ret_str)
                 # ret_str=str(ret_bytes,encoding="utf-8")
                 #
                 #
