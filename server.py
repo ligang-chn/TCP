@@ -8,7 +8,8 @@
 # *===================================*
 import socketserver
 import pymysql
-
+import struct
+import binascii
 
 class Database:
     """
@@ -123,67 +124,81 @@ class Server(socketserver.BaseRequestHandler):
             while True:#while循环实现多次数据传输
                 #从网络上读取的是字节流，数据是bytes，如果我们在代码中要对它做其他操作，就要转成decode()字符str
                 #decode():将字节bytes变为字符str
+                print("receive data: ")
                 ret_bytes= conn.recv(1024)#recv()用于接收数据，接收后转换为字符串便于处理
-                ret_str=str(ret_bytes,encoding="utf-8")
+                while len(ret_bytes)<6:#限制空字符
+                    ret_bytes = conn.recv(1024)
 
-
-                if ret_str=="quit":
-                    # conn.sendall(bytes("Connection dropped",encoding="utf-8"))
-                    print("[quit]<< connection lost")
-                    break
-                elif ret_str=="start#":
-                    #执行数据传输
-                    print("开始传输数据:")
-                    # for row in res:
-                    #     name = row[1]
-                    #     age = row[2]
-                    #     score=row[3]
-                    #     conn.sendall(bytes(str(name)+'|'+str(age)+'|'+str(score),encoding="utf-8"))
-                    #
-                    #     ret_bytes = conn.recv(1024)  # recv()用于接收数据，接收后转换为字符串便于处理
-                    #     ret_str = str(ret_bytes, encoding="utf-8")
-                    #     if ret_str=='0':
-                    #         pass
-                    #     else:
-                    #         conn.sendall(bytes(str(id)+str(name), encoding="utf-8"))
-
-
-
-                    # for row in res:
-                    #     id = row[0]
-                    #     name = row[1]
-                    #     conn.sendall(bytes(id+name, encoding="utf-8"))
-                    #     print(id,name)
-
-                        # ret_bytes = conn.recv(1024)  # recv()用于接收数据，接收后转换为字符串便于处理
-                        # ret_str = str(ret_bytes, encoding="utf-8")
-                        #
-                        # while ret_str =="fail#":
-                        #     conn.sendall(bytes(id + name, encoding="utf-8"))
-                        #     ret_bytes = conn.recv(1024)  # recv()用于接收数据，接收后转换为字符串便于处理
-                        #     ret_str = str(ret_bytes, encoding="utf-8")
-                        #     if ret_str=="ok#":
-                        #         break
-                    # while True:
-                    #     # 发送数据
-                    #     # print(data.upper())
-                    #     conn.sendall(bytes(res[0] + res[1], encoding="utf-8"))
-                else:
-                    print(ret_str)
-
-                    prt_res = ret_str.split(',')  # 分隔符
-                    print(prt_res)
-                    print("start insert*****")
-                    vals=(str(prt_res[0]),float(prt_res[1]),float(prt_res[2]))
-                    print(vals)
-
-                    try:
-                        self.database.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s) ", vals)
-                    # self.database.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s)",vals)
-                    #     self.database.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s)",vals)
-                    except Exception as e:
-                        print("insert fail!")
-                    # print("insert success!")
+                print(ret_bytes)
+                # tuplerec=struct.unpack("!9h",ret_bytes)
+                # print(tuplerec)
+                listrec=binascii.hexlify(ret_bytes).decode()#转换成原始16进制字符串，这个和mcu发送的字符一样
+                print(listrec)
+                # if(listrec[-1]=='9'):
+                #     print(listrec)
+                #     break
+                print(ret_bytes.decode("utf-8"))
+                # ret_str=str(ret_bytes,encoding="utf-8")
+                #
+                #
+                #
+                # if ret_str=="quit":
+                #     # conn.sendall(bytes("Connection dropped",encoding="utf-8"))
+                #     print("[quit]<< connection lost")
+                #     break
+                # elif ret_str=="start#":
+                #     #执行数据传输
+                #     print("开始传输数据:")
+                #     # for row in res:
+                #     #     name = row[1]
+                #     #     age = row[2]
+                #     #     score=row[3]
+                #     #     conn.sendall(bytes(str(name)+'|'+str(age)+'|'+str(score),encoding="utf-8"))
+                #     #
+                #     #     ret_bytes = conn.recv(1024)  # recv()用于接收数据，接收后转换为字符串便于处理
+                #     #     ret_str = str(ret_bytes, encoding="utf-8")
+                #     #     if ret_str=='0':
+                #     #         pass
+                #     #     else:
+                #     #         conn.sendall(bytes(str(id)+str(name), encoding="utf-8"))
+                #
+                #
+                #
+                #     # for row in res:
+                #     #     id = row[0]
+                #     #     name = row[1]
+                #     #     conn.sendall(bytes(id+name, encoding="utf-8"))
+                #     #     print(id,name)
+                #
+                #         # ret_bytes = conn.recv(1024)  # recv()用于接收数据，接收后转换为字符串便于处理
+                #         # ret_str = str(ret_bytes, encoding="utf-8")
+                #         #
+                #         # while ret_str =="fail#":
+                #         #     conn.sendall(bytes(id + name, encoding="utf-8"))
+                #         #     ret_bytes = conn.recv(1024)  # recv()用于接收数据，接收后转换为字符串便于处理
+                #         #     ret_str = str(ret_bytes, encoding="utf-8")
+                #         #     if ret_str=="ok#":
+                #         #         break
+                #     # while True:
+                #     #     # 发送数据
+                #     #     # print(data.upper())
+                #     #     conn.sendall(bytes(res[0] + res[1], encoding="utf-8"))
+                # else:
+                #     print(ret_str)
+                #
+                #     # prt_res = ret_str.split(',')  # 分隔符
+                #     # print(prt_res)
+                #     # print("start insert*****")
+                #     # vals=(str(prt_res[0]),float(prt_res[1]),float(prt_res[2]))
+                #     # print(vals)
+                #     #
+                #     # try:
+                #     #     self.database.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s) ", vals)
+                #     # # self.database.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s)",vals)
+                #     # #     self.database.sql_INSERT("INSERT INTO student(name,age,score) VALUES (%s,%s,%s)",vals)
+                #     # except Exception as e:
+                #     #     print("insert fail!")
+                #     # # print("insert success!")
 
 
         except Exception as e:
